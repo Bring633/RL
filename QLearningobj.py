@@ -9,10 +9,11 @@ Created on Wed Jan 26 19:15:51 2022
 import numpy as np
 import pandas as pd
 import torch
+from torch import FloatTensor
 
 class QLearningobj():
     
-    def __init__(self,alpha,gamma,epsilon,total_state,action_space,nn):
+    def __init__(self,alpha,gamma,epsilon,action_space,total_state,nn=False):
         
         self.alpha = alpha
         self.gamma = gamma
@@ -25,12 +26,6 @@ class QLearningobj():
             
             self.loss = torch.nn.MSELoss()
             self.sum_loss = []
-        
-        return None
-    
-    def init_state(self,state):
-        
-        self.now_state = state
         
         return None
     
@@ -52,18 +47,18 @@ class QLearningobj():
         if not nn:
             action = self.qtable[state,:].argmax()
         else:
-            action = self.find_max_action_nn(state)                
+            action = self.find_max_action_nn(state)               
         return action
     
     def find_max_action_nn(self,state):
         
         value,action = 0,0
         for i in range(self.action_space):
-            now_value = self.qtable(state,action)
+            now_value = self.qtable(FloatTensor(state).reshape(-1)).max()
             if now_value>value:
                 value = now_value
-                action = i
-                
+                action = self.qtable(FloatTensor(state).reshape(-1)).argmax()
+
         return action
             
     def update_qtable(self,r,now_state,last_state,action,nn):
@@ -80,11 +75,11 @@ class QLearningobj():
         else:
             
             now_max_action = self.find_max_action_nn(now_state)
-            now_max_q = self.qtable(now_state,now_max_action)
-            last_q = self.qtable(last_state,action)
+            now_max_q = r+self.gamma*self.qtable(FloatTensor(now_state).reshape(-1))
+            
+            last_q = self.qtable(FloatTensor(last_state).reshape(-1))
             
             l = self.loss(now_max_q,last_q)
-            self.optimizer.zero_grad()
             l.backward()
             self.optimizer.step()
             self.sum_loss.append(l.cpu().item())
