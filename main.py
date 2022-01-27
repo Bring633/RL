@@ -8,7 +8,7 @@ Created on Wed Jan 26 22:12:14 2022
 
 from Environment import Env
 from QLearningobj import QLearningobj
-from network_structure import Net
+from network_structure import Net,Net_wolf
 from tqdm import trange
 
 import torch
@@ -26,7 +26,7 @@ alpha = 0.01
 gamma = 0.9
 epsilon = 0.9
 
-#wolf_net = Net(MAP_SIZE[0]*MAP_SIZE[1],wolf_action_space)
+wolf_net = Net_wolf(MAP_SIZE[0]*MAP_SIZE[1],wolf_action_space)
 
 def main(net_wolf):
     
@@ -37,14 +37,14 @@ def main(net_wolf):
     
     for i in range(NUM_WOLF):
         
-        wolf = QLearningobj(alpha,gamma,epsilon,wolf_action_space,MAP_SIZE[0]*MAP_SIZE[1],True)
+        wolf = QLearningobj(alpha,gamma,epsilon,action_space,wolf_action_space,MAP_SIZE[0]*MAP_SIZE[1],True)
         wolf.init_qtable(NN,net_wolf)
         wolfs_list.append(wolf)
         
         
     for i in range(NUM_SHEEP):
         
-        sheep = QLearningobj(alpha,gamma,epsilon,action_space,MAP_SIZE[0]*MAP_SIZE[1],True)
+        sheep = QLearningobj(alpha,gamma,epsilon,action_space,wolf_action_space,MAP_SIZE[0]*MAP_SIZE[1],True)
         net = Net(sheep.total_state,sheep.action_space)
         sheep.init_qtable(NN,net)
         sheep_list.append(sheep)
@@ -66,9 +66,9 @@ if __name__ ==  '__main__':
     
     loss = []
     
-    for i in trange(5000):#trange有时候会打印不出来函数中的print
+    for i in trange(5000):#
     
-        wolf_net = torch.load(r'./wolf_net.pt')
+        #wolf_net = torch.load(r'./wolf_net.pt')
     
         flags,sing_los = main(wolf_net)
         loss.append(sing_los)
@@ -78,7 +78,7 @@ if __name__ ==  '__main__':
         else:
             sheep_success = sheep_success+1
             
-        torch.save(wolf_net,'./wolf_net.pt')
+        #torch.save(wolf_net,'./wolf_net.pt')
         
     plt.figure()
     plt.plot(loss)
@@ -86,3 +86,6 @@ if __name__ ==  '__main__':
     print('\n')
     print(wolf_success)
     print(sheep_success)
+    
+    
+    

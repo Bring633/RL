@@ -106,23 +106,51 @@ class Env():
         elif action == 2:
             if x!=self.map_size[0]-1:
                 x = x+1
-        else:
+        
+        elif action == 3:
             if x!=0:
                 x = x-1
 
-"""
         else:
-            if type_ !=2: 
-                if x!=0:
-                    x = x-1
+            if action == 4:
+                if y==self.map_size[1]-1:
+                    pass
+                elif y==self.map_size[1]-2:
+                    y = y+1
+                else:
+                    y = y+2
+                        
+            elif action == 5:
+                if y==0:
+                    pass
+                elif y==1:
+                    y = y-1
+                else:
+                    y = y-2
+                        
+            elif action == 6:
+                if x==self.map_size[1]-1:
+                    pass
+                elif x==self.map_size[1]-2:
+                    x = x+1
+                else:
+                    x = x+2
+                
             else:
-                if action == 3:
-                    if y!=self.map_size[1]-1
-"""
+                if x==0:
+                    pass
+                elif x==1:
+                    x = x-1
+                else:
+                    x = x-2
+                        
         if type_ == 1:
             now_state[x,y] = 1
         else:
-            now_state[x,y] = 2
+            try:
+                now_state[x,y] = 2
+            except:
+                print(x,y)
         
         agent.loc = (x,y)
         
@@ -169,11 +197,11 @@ class Env():
             
             for wolf in self.wolfs_list:
                     
-                action = wolf.take_action(self.state,nn)
+                action = wolf.take_action(self.state,nn,2)
                 now_state = self.get_next_state(action,wolf,2)
                 r = self.reward(action,wolf,1)
                     
-                wolf.update_qtable(r,now_state,self.state,action,nn)
+                wolf.update_qtable(r,now_state,self.state,action,2,nn)
                     
                 list_ = self.judge_sheep(wolf)
                 self.killed_sheep = self.killed_sheep + list_
@@ -188,11 +216,11 @@ class Env():
                 
             for sheep in self.sheep_list:
                     
-                action = sheep.take_action(self.state,nn)
+                action = sheep.take_action(self.state,nn,1)
                 r = self.reward(action,sheep,2)
                     
                 now_state = self.get_next_state(action,sheep,1)
-                sheep.update_qtable(r,now_state,self.state,action,nn)
+                sheep.update_qtable(r,now_state,self.state,action,1,nn)
                     
                 self.state = now_state
                     

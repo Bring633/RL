@@ -31,7 +31,7 @@ class Net_wolf(nn.Module):
     
     def __init__(self,input_size,output_size):
 
-        super(Net,self).__init__()        
+        super(Net_wolf,self).__init__()        
 
         self.layer1 = nn.Linear(input_size,32)
         self.layer2 = nn.Linear(32,128)

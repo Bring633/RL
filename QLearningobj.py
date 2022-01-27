@@ -13,7 +13,7 @@ from torch import FloatTensor
 
 class QLearningobj():
     
-    def __init__(self,alpha,gamma,epsilon,action_space,total_state,nn=False):
+    def __init__(self,alpha,gamma,epsilon,action_space,wolf_action_space,total_state,nn=False):
         
         self.alpha = alpha
         self.gamma = gamma
@@ -21,6 +21,7 @@ class QLearningobj():
         
         self.total_state = total_state
         self.action_space = action_space
+        self.action_space_wolf = wolf_action_space
         
         if nn:
             
@@ -39,21 +40,30 @@ class QLearningobj():
             self.optimizer = torch.optim.Adam(net.parameters(),0.01)
         return None
     
-    def take_action(self,state,nn):
+    def take_action(self,state,nn,type_):
         
         if np.random.random()>self.epsilon:
-            action = np.random.randint(self.action_space)
+            if type_ ==1:
+                action = np.random.randint(self.action_space)
+            else:
+                aciton = np.random.randint(self.action_space_wolf)
         
         if not nn:
             action = self.qtable[state,:].argmax()
         else:
-            action = self.find_max_action_nn(state)               
+            action = self.find_max_action_nn(state,type_)               
         return action
     
-    def find_max_action_nn(self,state):
+    def find_max_action_nn(self,state,type_):
         
         value,action = 0,0
-        for i in range(self.action_space):
+        
+        if type_ == 1:
+            actions_choice = self.action_space
+        else:
+            actions_choice = self.action_space_wolf
+        
+        for i in range(actions_choice):
             now_value = self.qtable(FloatTensor(state).reshape(-1)).max()
             if now_value>value:
                 value = now_value
@@ -61,7 +71,7 @@ class QLearningobj():
 
         return action
             
-    def update_qtable(self,r,now_state,last_state,action,nn):
+    def update_qtable(self,r,now_state,last_state,action,type_,nn):
         
         if not nn:
             
@@ -74,7 +84,7 @@ class QLearningobj():
                 
         else:
             
-            now_max_action = self.find_max_action_nn(now_state)
+            now_max_action = self.find_max_action_nn(now_state,type_)
             now_max_q = r+self.gamma*self.qtable(FloatTensor(now_state).reshape(-1))
             
             last_q = self.qtable(FloatTensor(last_state).reshape(-1))
