@@ -17,20 +17,16 @@ import matplotlib.pyplot as plt
 
 from multiprocessing import Process,Pool
 
-NUM_SHEEP = 1
-NUM_WOLF = 1
 NN = 1
-MAP_SIZE = (32,32)
 action_space = 4
 wolf_action_space = 8
 
-alpha = 0.01
-gamma = 0.9
-epsilon = 0.9
-    
+
+#device = 'cuda' if torch.cuda.is_available() else 'cpu'
+device = 'cpu'
 
 
-def main_train(net_wolf):
+def main_train(net_wolf,NUM_SHEEP,NUM_WOLF,MAP_SIZE,pretrain = None,alpha=0.01,gamma=0.9,epsilon=0.9):
     
     env = Env(MAP_SIZE)  
     
@@ -60,7 +56,7 @@ def main_train(net_wolf):
     else:
         return 2,mean_loss
     
-def main_exec(net_wolf):
+def main_exec(net_wolf,NUM_SHEEP,NUM_WOLF,MAP_SIZE,pretrain = None,alpha=0.01,gamma=0.9,epsilon=0.9):
     
     env = Env(MAP_SIZE)  
     
@@ -88,31 +84,39 @@ def main_exec(net_wolf):
     else:
         return 2,
 
-def experiments(exp,pretrain = None):
+def experiments(num_sheep,num_wolf,map_size,exp,pretrain = None,alpha=0.01,gamma=0.9,epsilon=0.9):
+    
+    NUM_SHEEP = num_sheep
+    NUM_WOLF = num_wolf
+    MAP_SIZE = map_size
+
+    alpha = alpha
+    gamma = gamma
+    epsilon = epsilon
     
     wolf_success = 0
     sheep_success = 0
-    
+    #net_wolf,NUM_SHEEP,NUM_WOLF,MAP_SIZE,exp,alpha=0.01,gamma=0.9,epsilon=0.9,pretrain = None
     if pretrain != None:
         
-        wolf_net = Net_wolf(MAP_SIZE[0]*MAP_SIZE[1],wolf_action_space)
+        wolf_net = Net_wolf(MAP_SIZE[0]*MAP_SIZE[1],wolf_action_space).to(device)
         
         for i in range(pretrain):
         
-            flags,sing_los = main_train(wolf_net)
+            flags,sing_los = main_train(wolf_net,NUM_SHEEP,NUM_WOLF,MAP_SIZE)
             
             if flags == 1:
                 wolf_success = wolf_success+1
             else:
                 sheep_success = sheep_success+1
                 
-            torch.save(wolf_net,r'./wolf_net_{}'.format(pretrain))
+            torch.save(wolf_net,r'./wolf_net_{}.pt'.format(pretrain))
              
         wolf_net = torch.load(r'./wolf_net_{}.pt'.format(pretrain))
         
         for i in range(exp):
             
-            flags = main_exec(wolf_net)
+            flags = main_exec(wolf_net,NUM_SHEEP,NUM_WOLF,MAP_SIZE)
         
             if flags == 1:
                 wolf_success = wolf_success+1
@@ -126,7 +130,7 @@ def experiments(exp,pretrain = None):
         
         for i in range(exp):
             
-            flags = main_exec(wolf_net)
+            flags = main_exec(wolf_net,NUM_SHEEP,NUM_WOLF,MAP_SIZE)
         
             if flags == 1:
                 wolf_success = wolf_success+1
@@ -137,8 +141,10 @@ def experiments(exp,pretrain = None):
 
 
 if __name__ ==  '__main__':
-    
-    exp_list = [(100,None),(100,50),(100,100),(100,300),(100,500),(100,1000)]
+    #num_sheep,num_wolf,map_size,exp,pretrain = None,alpha=0.01,gamma=0.9,epsilon=0.9
+    exp_list = [(1,1,(32,32),100,None),(1,1,(32,32),100,50),(1,1,(32,32),100,100),\
+                (1,1,(32,32),100,300),(1,1,(32,32),100,500),(1,1,(32,32),100,1000)]
+    #exp_list = [(1,1,(32,32),100,None)]
     data = []
     p_list = []
     pool = Pool(processes = 10)
@@ -151,5 +157,7 @@ if __name__ ==  '__main__':
     
     for i in p_list:
         data.append(i.get())
+    
+    print(data)
     
     
