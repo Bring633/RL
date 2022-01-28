@@ -33,9 +33,9 @@ class Net_wolf(nn.Module):
 
         super(Net_wolf,self).__init__()        
 
-        self.layer1 = nn.Linear(input_size,32)
-        self.layer2 = nn.Linear(32,128)
-        self.layer3 = nn.Linear(128,output_size)
+        self.layer1 = nn.Linear(input_size,1024)
+        self.layer2 = nn.Linear(1024,256)
+        self.layer3 = nn.Linear(256,output_size)
         
     def forward(self,X,):
 

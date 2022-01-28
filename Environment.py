@@ -77,7 +77,9 @@ class Env():
                 sum_dis = sum_dis+dis
             
             if agent.last_time_dis>sum_dis:
-                reward = reward+0.1
+                reward = reward
+            else:
+                reward = reward-0.01
             for i in range(len(self.sheep_list)):
                 if self.sheep_list[i].loc == agent.loc:
                     reward = reward+10
@@ -221,6 +223,56 @@ class Env():
                     
                 now_state = self.get_next_state(action,sheep,1)
                 sheep.update_qtable(r,now_state,self.state,action,1,nn)
+                    
+                self.state = now_state
+                    
+                #print('sheep at {}'.format(sheep.loc))
+                
+            step = step + 1
+                
+        return None
+    
+    def main_without_update(self,wolfs,sheep,nn):
+        
+        self.get_agent(wolfs,sheep)
+        self.init_environment()
+        self.random_init_place()
+        self.init_state()
+            
+        step = 0
+            
+        while(True):
+            
+            if step>50:
+                
+                break
+            
+            for wolf in self.wolfs_list:
+                    
+                action = wolf.take_action(self.state,nn,2)
+                now_state = self.get_next_state(action,wolf,2)
+                #r = self.reward(action,wolf,1)
+                    
+                #wolf.update_qtable(r,now_state,self.state,action,2,nn)
+                    
+                list_ = self.judge_sheep(wolf)
+                self.killed_sheep = self.killed_sheep + list_
+                    
+                self.state = now_state
+                    
+                    #print('wolf at {}'.format(wolf.loc))
+                
+                if len(self.sheep_list)==0:
+                    
+                    return None
+                
+            for sheep in self.sheep_list:
+                    
+                action = sheep.take_action(self.state,nn,1)
+                r = self.reward(action,sheep,2)
+                    
+                now_state = self.get_next_state(action,sheep,1)
+                #sheep.update_qtable(r,now_state,self.state,action,1,nn)
                     
                 self.state = now_state
                     
