@@ -107,11 +107,10 @@ def experiments(exp,pretrain = None):
                 sheep_success = sheep_success+1
                 
             torch.save(wolf_net,r'./wolf_net_{}'.format(pretrain))
-              
+             
+        wolf_net = torch.load(r'./wolf_net_{}.pt'.format(pretrain))
         
         for i in range(exp):
-            
-            wolf_net = torch.load(r'./wolf_net_{}.pt'.format(pretrain))
             
             flags = main_exec(wolf_net)
         
