@@ -10,6 +10,8 @@ import numpy as np
 from QLearningobj import QLearningobj
 from network_structure import Net
 
+import matplotlib.pyplot as plt
+
 
 class Env():
     
@@ -164,7 +166,7 @@ class Env():
         for i in range(len(self.sheep_list)):
             if self.sheep_list[i].loc == agent.loc:
                 index_.append(i)
-                print("killed")
+                #print("killed")
         
         left_index = set(range(len(self.sheep_list)))-set(index_)
         left_ = []
